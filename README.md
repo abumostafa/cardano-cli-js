@@ -4,14 +4,14 @@ JS wrapper for [cardano-node-cli](https://github.com/input-output-hk/cardano-nod
 
 ### Installation
 ```
-npm i --save @abumostafa/cardano-cli-js
+npm i --save @abumostafa/cardano-cli
 ```
 
 ### Usage
 
 - **initialize**
     ```js
-    import { CardanoCli } from "@abumostafa/cardano-cli-js"
+    import { CardanoCli } from "@abumostafa/cardano-cli"
     
     const cli = new CardanoCli({
         binPath: "/path/to/cardano-cli", // default is cardano-cli 
