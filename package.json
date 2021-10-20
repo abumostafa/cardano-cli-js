@@ -1,8 +1,9 @@
 {
   "name": "@abumostafa/cardano-cli",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "JS cardano cli",
   "main": "dist/index.js",
+  "typings": "src/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

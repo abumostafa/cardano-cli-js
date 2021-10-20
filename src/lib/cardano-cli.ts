@@ -15,6 +15,11 @@ interface AddressBuildOptions {
   signing?: boolean
 }
 
+interface StakeAddressBuildOptions {
+  account: string
+  fileName: string
+}
+
 interface QueryUTXOOptions {
   address: string
 }
@@ -122,7 +127,27 @@ export class CardanoCli {
 
   get stakeAddress() {
     return {
-      geyGen: ({ account, fileName }: AddressKeyGenOptions) => {
+      build: ({ account, fileName }: StakeAddressBuildOptions): string | undefined => {
+        const stakeVkey = this.path("accounts", account, `${fileName}.stake.vkey`)
+        this.assertFileExists(stakeVkey)
+
+        const outputFile = this.path("accounts", account, `${fileName}.stake.addr`)
+
+        this.assertNotFileExists(outputFile)
+
+        this.exec([
+          "stake-address",
+          "build",
+          "--stake-verification-key-file",
+          stakeVkey,
+          "--out-file",
+          outputFile,
+          `--${this.network}`
+        ])
+
+        return outputFile
+      },
+      keyGen: ({ account, fileName }: AddressKeyGenOptions) => {
         const stakeVkey = this.path("accounts", account, `${fileName}.stake.vkey`)
         const stakeSkey = this.path("accounts", account, `${fileName}.stake.skey`)
 

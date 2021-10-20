@@ -70,7 +70,23 @@ class CardanoCli {
     }
     get stakeAddress() {
         return {
-            geyGen: ({ account, fileName }) => {
+            build: ({ account, fileName }) => {
+                const stakeVkey = this.path("accounts", account, `${fileName}.stake.vkey`);
+                this.assertFileExists(stakeVkey);
+                const outputFile = this.path("accounts", account, `${fileName}.stake.addr`);
+                this.assertNotFileExists(outputFile);
+                this.exec([
+                    "stake-address",
+                    "build",
+                    "--stake-verification-key-file",
+                    stakeVkey,
+                    "--out-file",
+                    outputFile,
+                    `--${this.network}`
+                ]);
+                return outputFile;
+            },
+            keyGen: ({ account, fileName }) => {
                 const stakeVkey = this.path("accounts", account, `${fileName}.stake.vkey`);
                 const stakeSkey = this.path("accounts", account, `${fileName}.stake.skey`);
                 this.assertNotFileExists(stakeVkey);
