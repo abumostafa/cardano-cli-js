@@ -18,16 +18,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CardanoCli = void 0;
 const child_process_1 = require("child_process");
 const fs = __importStar(require("fs"));
+const path_1 = __importDefault(require("path"));
 class CardanoCli {
     constructor(options) {
-        this.binPath = options.binPath;
-        this.storageDir = options.storageDir;
+        this.binPath = options.binPath || "cardano-cli";
+        this.storageDir = options.storageDir || path_1.default.resolve(__dirname, "storage");
         this.network = options.network || "mainnet";
-        this.shelleyGenesis = options.shelleyGenesis || "testnet-shelley-genesis.json";
+        this.shelleyGenesis = options.shelleyGenesis;
     }
     get address() {
         return {

@@ -13,10 +13,11 @@ npm i --save @abumostafa/cardano-cli-js
     ```js
     import CardanoCli from "@abumostafa/cardano-cli-js"
     
-    const cli = new CradanoCli({
+    const cli = new CardanoCli({
         binPath: "/path/to/cardano-cli", // default is cardano-cli 
         storageDir: path.resolve(__dirname, "storage"), // storage path for keys, transactions, etc.,
-        network: "mainnet" // "mainnet" || "testnet-magic 1097911063"
+        network: "mainnet", // "mainnet" || "testnet-magic 1097911063",
+        shelleyGenesis: "/path/to/shelley-genesis.json"
     })
     ```
 

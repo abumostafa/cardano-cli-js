@@ -1,11 +1,12 @@
 import { execSync } from "child_process"
 import * as fs from "fs"
+import path from "path"
 
 interface CardanoCliOptions {
-  storageDir: string
-  binPath: string
+  storageDir?: string
+  binPath?: string
   network?: string
-  shelleyGenesis?: string
+  shelleyGenesis: string
 }
 
 interface AddressBuildOptions {
@@ -69,10 +70,10 @@ export class CardanoCli {
   private shelleyGenesis: string
 
   constructor(options: CardanoCliOptions) {
-    this.binPath = options.binPath
-    this.storageDir = options.storageDir
+    this.binPath = options.binPath || "cardano-cli"
+    this.storageDir = options.storageDir || path.resolve(__dirname, "storage")
     this.network = options.network || "mainnet"
-    this.shelleyGenesis = options.shelleyGenesis || "testnet-shelley-genesis.json"
+    this.shelleyGenesis = options.shelleyGenesis
   }
 
   get address() {
