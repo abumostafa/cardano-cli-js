@@ -314,10 +314,6 @@ export class CardanoCli {
     try {
       const cmd = `${this.binPath} ${args.join(" ")}`
 
-      console.log(`#####################`)
-      console.log(cmd)
-      console.log(`#####################`)
-
       return execSync(cmd).toString()
     } catch (err) {
       this.print(err)

@@ -1,6 +1,6 @@
 {
   "name": "@abumostafa/cardano-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "JS cardano cli",
   "main": "dist/index.js",
   "typings": "src/index.d.ts",
