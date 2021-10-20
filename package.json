@@ -1,5 +1,5 @@
 {
-  "name": "@abumostafa/cardano-cli-js",
+  "name": "@abumostafa/cardano-cli",
   "version": "1.0.0",
   "description": "JS cardano cli",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/abumostafa/cardano-cli-js.git"
+    "url": "git+https://github.com/abumostafa/cardano-cli-js.git"
   },
   "keywords": [
     "cardano-cli",

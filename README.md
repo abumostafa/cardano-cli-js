@@ -11,7 +11,7 @@ npm i --save @abumostafa/cardano-cli-js
 
 - **initialize**
     ```js
-    import CardanoCli from "@abumostafa/cardano-cli-js"
+    import { CardanoCli } from "@abumostafa/cardano-cli-js"
     
     const cli = new CardanoCli({
         binPath: "/path/to/cardano-cli", // default is cardano-cli 
