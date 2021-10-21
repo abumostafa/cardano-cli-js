@@ -270,7 +270,7 @@ export class CardanoCli {
           "--witness-count",
           "2",
           "--genesis",
-          this.path(this.shelleyGenesis),
+          this.shelleyGenesis,
           `--${this.network}`
         ])
 
@@ -295,13 +295,12 @@ export class CardanoCli {
       },
       submit: ({ tx }: { tx: string }) => {
         this.exec(["transaction", "submit", "--tx-file", tx, `--${this.network}`])
-        this.transaction.txid({ txFile: tx })
+        return this.transaction.txid({ txFile: tx })
       },
       txid: ({ txFile }: { txFile: string }) => {
         return this.exec(["transaction", "txid", "--tx-file", txFile])
       },
       view: ({ txBody }: { txBody: string; tx: string }) => {
-        this
       }
     }
   }
@@ -316,8 +315,7 @@ export class CardanoCli {
 
       return execSync(cmd).toString()
     } catch (err) {
-      this.print(err)
-      this.exit(1)
+      this.throwError(err)
     }
   }
 
@@ -327,25 +325,14 @@ export class CardanoCli {
 
   private assertFileExists(path: string) {
     if (!fs.existsSync(path)) {
-      this.print(`File not found ${path}. abort\n`)
-      this.exit(1)
+      this.throwError(new Error(`File not found ${path}. abort\n`))
     }
   }
 
   private assertNotFileExists(path: string) {
     if (fs.existsSync(path)) {
-      this.print(`File exists ${path}. abort\n`)
-      this.exit(1)
+      this.throwError(new Error(`File exists ${path}. abort\n`))
     }
-  }
-
-  private print(output: Error | string | unknown) {
-    if (output instanceof Error) {
-      process.stderr.write(`${output.stack}`)
-      return
-    }
-
-    process.stdout.write(output as string)
   }
 
   private mkdir(dir: string) {
@@ -356,11 +343,15 @@ export class CardanoCli {
 
       execSync(`mkdir -p ${dir}`)
     } catch (err) {
-      this.exit(1)
+      this.throwError(err)
     }
   }
 
-  private exit(code = 0) {
-    process.exit(code)
+  private throwError(err: Error | string | unknown) {
+    if (err instanceof Error) {
+      throw err
+    }
+
+    throw new Error(err as string)
   }
 }
