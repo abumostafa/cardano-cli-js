@@ -209,7 +209,8 @@ class CardanoCli {
                 return this.transaction.txid({ txFile: tx });
             },
             txid: ({ txFile }) => {
-                return this.exec(["transaction", "txid", "--tx-file", txFile]);
+                var _a;
+                return (_a = this.exec(["transaction", "txid", "--tx-file", txFile])) === null || _a === void 0 ? void 0 : _a.trim();
             },
             view: ({ txBody }) => {
             }

@@ -298,7 +298,7 @@ export class CardanoCli {
         return this.transaction.txid({ txFile: tx })
       },
       txid: ({ txFile }: { txFile: string }) => {
-        return this.exec(["transaction", "txid", "--tx-file", txFile])
+        return this.exec(["transaction", "txid", "--tx-file", txFile])?.trim()
       },
       view: ({ txBody }: { txBody: string; tx: string }) => {
       }
