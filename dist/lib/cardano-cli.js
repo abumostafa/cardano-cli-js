@@ -185,7 +185,7 @@ class CardanoCli {
                     "--witness-count",
                     "2",
                     "--genesis",
-                    this.path(this.shelleyGenesis),
+                    this.shelleyGenesis,
                     `--${this.network}`
                 ]);
                 return response ? Number(response === null || response === void 0 ? void 0 : response.split(" ")[0]) : undefined;
@@ -206,13 +206,12 @@ class CardanoCli {
             },
             submit: ({ tx }) => {
                 this.exec(["transaction", "submit", "--tx-file", tx, `--${this.network}`]);
-                this.transaction.txid({ txFile: tx });
+                return this.transaction.txid({ txFile: tx });
             },
             txid: ({ txFile }) => {
                 return this.exec(["transaction", "txid", "--tx-file", txFile]);
             },
             view: ({ txBody }) => {
-                this;
             }
         };
     }
@@ -223,14 +222,10 @@ class CardanoCli {
     exec(args) {
         try {
             const cmd = `${this.binPath} ${args.join(" ")}`;
-            console.log(`#####################`);
-            console.log(cmd);
-            console.log(`#####################`);
             return (0, child_process_1.execSync)(cmd).toString();
         }
         catch (err) {
-            this.print(err);
-            this.exit(1);
+            this.throwError(err);
         }
     }
     path(...args) {
@@ -238,22 +233,13 @@ class CardanoCli {
     }
     assertFileExists(path) {
         if (!fs.existsSync(path)) {
-            this.print(`File not found ${path}. abort\n`);
-            this.exit(1);
+            this.throwError(new Error(`File not found ${path}. abort\n`));
         }
     }
     assertNotFileExists(path) {
         if (fs.existsSync(path)) {
-            this.print(`File exists ${path}. abort\n`);
-            this.exit(1);
+            this.throwError(new Error(`File exists ${path}. abort\n`));
         }
-    }
-    print(output) {
-        if (output instanceof Error) {
-            process.stderr.write(`${output.stack}`);
-            return;
-        }
-        process.stdout.write(output);
     }
     mkdir(dir) {
         try {
@@ -263,11 +249,14 @@ class CardanoCli {
             (0, child_process_1.execSync)(`mkdir -p ${dir}`);
         }
         catch (err) {
-            this.exit(1);
+            this.throwError(err);
         }
     }
-    exit(code = 0) {
-        process.exit(code);
+    throwError(err) {
+        if (err instanceof Error) {
+            throw err;
+        }
+        throw new Error(err);
     }
 }
 exports.CardanoCli = CardanoCli;
