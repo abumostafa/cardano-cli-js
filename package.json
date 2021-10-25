@@ -1,6 +1,6 @@
 {
   "name": "@abumostafa/cardano-cli",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "JS cardano cli",
   "main": "dist/index.js",
   "typings": "src/index.d.ts",
@@ -21,5 +21,9 @@
   "bugs": {
     "url": "https://github.com/abumostafa/cardano-cli-js/issues"
   },
-  "homepage": "https://github.com/abumostafa/cardano-cli-js#readme"
+  "homepage": "https://github.com/abumostafa/cardano-cli-js#readme",
+  "devDependencies": {
+    "eslint": "^8.1.0",
+    "prettier": "^2.4.1"
+  }
 }

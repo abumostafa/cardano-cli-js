@@ -37,6 +37,11 @@ npm i --save @abumostafa/cardano-cli
       const paymentAddr = cli.address.build({ account: "Ahmed", fileName: "wallet0", signing: true })
       // output: /path/to/wallet0.payment.addr 
     ```
+    - keyHash
+    ```js
+      const keyHash = cli.address.keyHash({ account: "Ahmed", vkeyFileName: "verification-key-file-name" })
+      // output: cb64ffbb1... 
+    ```
 
 - **stake-address**
     - key-gen
@@ -98,6 +103,27 @@ npm i --save @abumostafa/cardano-cli
     ```js
       const txHash = cli.transaction.submit({ 
           tx: "/path/to/transactions/now-signed.json",
+      })
+      // output: cb64ffbb1...
+    ```
+    - view
+    ```js
+      const txHash = cli.transaction.view({ 
+          txFile: "/path/to/transactions/now-signed.json",
+      })
+      // output: cb64ffbb1...
+    ```
+    - policyId
+    ```js
+      const txHash = cli.transaction.policyId({ 
+          scriptFile: "/path/to/policies/policy.script",
+      })
+      // output: cb64ffbb1...
+    ```
+    - txid
+    ```js
+      const txHash = cli.transaction.txid({ 
+          txFile: "/path/to/transactions/now-signed.json",
       })
       // output: cb64ffbb1...
     ```

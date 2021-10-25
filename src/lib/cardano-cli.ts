@@ -1,78 +1,30 @@
+import {
+  AddressBuildOptions,
+  AddressKeyGenOptions,
+  AddressKeyHashOptions,
+  Asset,
+  CardanoCliAddress,
+  CardanoCliOptions,
+  CardanoCliQuery,
+  CardanoCliStakeAddress,
+  CardanoCliTransaction,
+  ProtocolParametersOptions,
+  QueryUTXOOptions,
+  StakeAddressBuildOptions,
+  TransactionBuildRawOptions,
+  TxIn,
+  TxOut,
+  UTXo
+} from "../types"
 import { execSync } from "child_process"
 import * as fs from "fs"
 import path from "path"
 
-interface CardanoCliOptions {
-  storageDir?: string
-  binPath?: string
-  network?: string
-  shelleyGenesis: string
-}
-
-interface AddressBuildOptions {
-  account: string
-  fileName: string
-  signing?: boolean
-}
-
-interface StakeAddressBuildOptions {
-  account: string
-  fileName: string
-}
-
-interface QueryUTXOOptions {
-  address: string
-}
-
-interface AddressKeyGenOptions {
-  account: string
-  fileName: string
-}
-
-interface ProtocolParametersOptions {
-  fileName?: string
-}
-
-interface TxIn {
-  txHash: string
-  txId: number
-}
-
-interface TxOut {
-  address: string
-  lovelace: number
-  assets?: {
-    type: string
-    quantity: number
-  }[]
-}
-
-interface TransactionBuildRawOptions {
-  txIn: TxIn[]
-  txOut: TxOut[]
-  fee?: number
-  invalidBefore?: number
-  invalidHereafter?: number
-}
-
-interface Asset {
-  quantity: number
-  type: string
-}
-
-interface UTXo {
-  txHash: string
-  txId: number
-  lovelace: number
-  txDatum: string
-  assets: Asset[]
-}
-
 export class CardanoCli {
-  private binPath: string
-  private storageDir: string
-  private network: string
-  private shelleyGenesis: string
+  private readonly binPath: string
+  private readonly storageDir: string
+  private readonly network: string
+  private readonly shelleyGenesis: string
 
   constructor(options: CardanoCliOptions) {
     this.binPath = options.binPath || "cardano-cli"
@@ -81,7 +33,7 @@ export class CardanoCli {
     this.shelleyGenesis = options.shelleyGenesis
   }
 
-  get address() {
+  get address(): CardanoCliAddress {
     return {
       build: ({ account, fileName, signing = false }: AddressBuildOptions): string | undefined => {
         let stakeVkey = ""
@@ -121,11 +73,19 @@ export class CardanoCli {
         this.exec(["address", "key-gen", "--verification-key-file", paymentVkey, "--signing-key-file", paymentSkey])
 
         return { vkey: paymentVkey, skey: paymentSkey }
+      },
+      keyHash: ({ account, vkeyFileName }: AddressKeyHashOptions): string | undefined => {
+        const paymentVkey = this.path("accounts", account, `${vkeyFileName}.payment.vkey`)
+
+        this.assertFileExists(paymentVkey)
+
+        this.mkdir(this.path("accounts", account))
+        return this.exec(["address", "key-hash", "--payment-verification-key-file", paymentVkey])?.trim()
       }
     }
   }
 
-  get stakeAddress() {
+  get stakeAddress(): CardanoCliStakeAddress {
     return {
       build: ({ account, fileName }: StakeAddressBuildOptions): string | undefined => {
         const stakeVkey = this.path("accounts", account, `${fileName}.stake.vkey`)
@@ -162,7 +122,7 @@ export class CardanoCli {
     }
   }
 
-  get query() {
+  get query(): CardanoCliQuery {
     return {
       utxo: ({ address }: QueryUTXOOptions): UTXo[] => {
         const utxos = this.exec(["query", "utxo", "--address", address, `--${this.network}`])
@@ -214,9 +174,18 @@ export class CardanoCli {
     }
   }
 
-  get transaction() {
+  get transaction(): CardanoCliTransaction {
     return {
-      buildRaw: ({ txIn, txOut, fee, invalidBefore, invalidHereafter }: TransactionBuildRawOptions) => {
+      buildRaw: ({
+        txIn,
+        txOut,
+        fee,
+        invalidBefore,
+        invalidHereafter,
+        mintingScript,
+        metadataFile,
+        mint
+      }: TransactionBuildRawOptions): string => {
         const senders = ((txIn: TxIn[]): string[] => {
           return txIn.map((input) => {
             return `${input.txHash}#${input.txId}`
@@ -230,6 +199,7 @@ export class CardanoCli {
             if (output.assets) {
               result += output.assets.map(({ type, quantity }) => `+${quantity} ${type}`).join("")
             }
+            // eslint-disable-next-line quotes
             result += '"'
 
             return result
@@ -248,9 +218,12 @@ export class CardanoCli {
           "--invalid-before",
           `${invalidBefore || 0}`,
           "--invalid-hereafter",
-          `${invalidHereafter || this.query.tip().slot + 10000}`,
+          `${invalidHereafter || (this.query.tip()?.slot || 0) + 10000}`,
           "--fee",
           `${fee || 0}`,
+          ...(mintingScript ? ["--minting-script-file", mintingScript] : []),
+          ...(metadataFile ? ["--metadata-json-file", metadataFile] : []),
+          ...(mint ? ["--mint", mint] : []),
           "--out-file",
           outFile
         ])
@@ -293,14 +266,18 @@ export class CardanoCli {
 
         return outFile
       },
-      submit: ({ tx }: { tx: string }) => {
+      submit: ({ tx }: { tx: string }): string | undefined => {
         this.exec(["transaction", "submit", "--tx-file", tx, `--${this.network}`])
         return this.transaction.txid({ txFile: tx })
       },
-      txid: ({ txFile }: { txFile: string }) => {
+      txid: ({ txFile }: { txFile: string }): string | undefined => {
         return this.exec(["transaction", "txid", "--tx-file", txFile])?.trim()
       },
-      view: ({ txBody }: { txBody: string; tx: string }) => {
+      view: ({ txFile }: { txFile: string }): string | undefined => {
+        return this.exec(["transaction", "view", "--tx-file", txFile])?.toString()
+      },
+      policyId: ({ scriptFile }: { scriptFile: string }): string | undefined => {
+        return this.exec(["transaction", "policyid", "--script-file", scriptFile])?.trim()
       }
     }
   }

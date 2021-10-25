@@ -65,6 +65,13 @@ class CardanoCli {
                 this.mkdir(this.path("accounts", account));
                 this.exec(["address", "key-gen", "--verification-key-file", paymentVkey, "--signing-key-file", paymentSkey]);
                 return { vkey: paymentVkey, skey: paymentSkey };
+            },
+            keyHash: ({ account, vkeyFileName }) => {
+                var _a;
+                const paymentVkey = this.path("accounts", account, `${vkeyFileName}.payment.vkey`);
+                this.assertFileExists(paymentVkey);
+                this.mkdir(this.path("accounts", account));
+                return (_a = this.exec(["address", "key-hash", "--payment-verification-key-file", paymentVkey])) === null || _a === void 0 ? void 0 : _a.trim();
             }
         };
     }
@@ -138,7 +145,8 @@ class CardanoCli {
     }
     get transaction() {
         return {
-            buildRaw: ({ txIn, txOut, fee, invalidBefore, invalidHereafter }) => {
+            buildRaw: ({ txIn, txOut, fee, invalidBefore, invalidHereafter, mintingScript, metadataFile, mint }) => {
+                var _a;
                 const senders = ((txIn) => {
                     return txIn.map((input) => {
                         return `${input.txHash}#${input.txId}`;
@@ -150,6 +158,7 @@ class CardanoCli {
                         if (output.assets) {
                             result += output.assets.map(({ type, quantity }) => `+${quantity} ${type}`).join("");
                         }
+                        // eslint-disable-next-line quotes
                         result += '"';
                         return result;
                     });
@@ -164,9 +173,12 @@ class CardanoCli {
                     "--invalid-before",
                     `${invalidBefore || 0}`,
                     "--invalid-hereafter",
-                    `${invalidHereafter || this.query.tip().slot + 10000}`,
+                    `${invalidHereafter || (((_a = this.query.tip()) === null || _a === void 0 ? void 0 : _a.slot) || 0) + 10000}`,
                     "--fee",
                     `${fee || 0}`,
+                    ...(mintingScript ? ["--minting-script-file", mintingScript] : []),
+                    ...(metadataFile ? ["--metadata-json-file", metadataFile] : []),
+                    ...(mint ? ["--mint", mint] : []),
                     "--out-file",
                     outFile
                 ]);
@@ -212,7 +224,13 @@ class CardanoCli {
                 var _a;
                 return (_a = this.exec(["transaction", "txid", "--tx-file", txFile])) === null || _a === void 0 ? void 0 : _a.trim();
             },
-            view: ({ txBody }) => {
+            view: ({ txFile }) => {
+                var _a;
+                return (_a = this.exec(["transaction", "view", "--tx-file", txFile])) === null || _a === void 0 ? void 0 : _a.toString();
+            },
+            policyId: ({ scriptFile }) => {
+                var _a;
+                return (_a = this.exec(["transaction", "policyid", "--script-file", scriptFile])) === null || _a === void 0 ? void 0 : _a.trim();
             }
         };
     }
